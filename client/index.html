@@ -1,0 +1,31 @@
+<html>
+<head style="overflow: hidden">
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script type="text/javascript" src="/js/temp.js"></script>
+<script type="text/javascript" src="/js/bullet.js"></script>
+<script type="text/javascript" src="/js/main.js"></script>
+</head>
+<body style="overflow: hidden ;margin:0px ;padding: 0">
+
+<div id="serverDiv" align="center">
+<table id="inputTable">
+<tr>
+<td> Namn </td>
+<td> Server </td>
+<td> Map </td>
+</tr>
+<tr>
+<td> <input type="text" id="nameTxt"/> </td>
+<td> <input type="text" id="roomTxt"/> </td>
+<td> <input type="text" id="mapTxt"/> </td>
+</tr>
+</table>
+<button type="button" id="button">Join game</button>
+<table id="serverTable" border="1"></table>
+</div>
+
+
+<canvas id="canvas" width=960 height="540"style="margin :0px;cursor: none"></canvas>
+</body>
+</html>
