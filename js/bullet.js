@@ -1,10 +1,11 @@
-var bullet=function (id,playerid,vec2Pos,direction){
-  this.speed=8;
+var bullet=function (id,playerid,vec2Pos,direction, damage, speed){
+  this.speed=speed;
+  this.damage = damage;
   this.id=id;
   this.hitId=0;
   this.remove=false;
   this.playerid=playerid;
-  this.rect={x:vec2Pos.x,y:vec2Pos.y,width:5,height:5}
+  this.rect={x:vec2Pos.x,y:vec2Pos.y,width:5,height:5};
   this.direction=direction;
   
   this.update=function(multiplicator,objects){

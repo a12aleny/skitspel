@@ -1,5 +1,5 @@
-var bullet=function (id,playerid,vec2Pos,direction){
-  this.speed=8;
+var bullet=function (id,playerid,vec2Pos,direction,speed){
+  this.speed=speed;
   this.id=id;
   this.remove=false;
   this.playerid=playerid;

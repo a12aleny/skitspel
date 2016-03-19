@@ -18,6 +18,8 @@ this.bullets=[];
 this.lastPlayerState=[];
 this.currentPlayerStates=[];
 this.minimalplayers=[];
+this.mapInfo = null;
+
 
 this.newTime;
 this.lastFrameTime;
@@ -25,7 +27,7 @@ this.oldTime;
 this.fpsTimer=0;
 this.fpsTicker=0;
 this.accumilator=0;
-this.wishedFrameRate=1000/45;
+this.wishedFrameRate=1000/60;
 fs.readFile('./maps/'+this.mapName+".map",this.initilize.bind(this));
 this.eventEmitter.on("death",function(data){
   this.io.to(this.room).emit('addParticle',{pos:data.pos,color:data.color,amount:200});
@@ -38,7 +40,7 @@ this.eventEmitter.on("hit",function(data){
 Game.prototype.initilize=function(err,data){
 
   if (err){
-    this.mapInfo={color:"#FFFFFF",map:[{"id":0,"x":-100,"y":-10,"width":100,"height":620},{"id":0,"x":-10,"y":-30,"width":980,"height":30},{"id":0,"x":960,"y":-10,"width":50,"height":560},{"id":0,"x":-10,"y":540,"width":980,"height":50}]};
+    this.mapInfo={color:"#FFFFFF",map:[{"id":0,"x":-100,"y":-10,"width":100,"height":620},{"id":0,"x":-10,"y":-30,"width":980,"height":30},{"id":0,"x":960,"y":-10,"width":50,"height":560},{"id":0,"x":-10,"y":540,"width":980,"height":50}], spawns:[{"x":200,"y":200}, {"x":300,"y":200}, {"x":400,"y":200}]};
   }
   else{
     this.mapInfo=JSON.parse(data);
@@ -52,8 +54,12 @@ Game.prototype.initilize=function(err,data){
 };
 
 Game.prototype.Start= function (that){
-setInterval(this.Update.bind(that),1000/45);
+setInterval(this.Update.bind(that), 1000/60);
 };
+
+Game.prototype.get_mapInfo=function(){
+    return this.mapInfo;
+}
 
 Game.prototype.Update=function (){
   this.newTime = new Date().getTime();
@@ -80,7 +86,7 @@ Game.prototype.Update=function (){
     //Update Player and make a smaller object
   this.accumilator+=this.lastFrameTime;
   while(this.accumilator>this.wishedFrameRate){
-      this.players[i].update(this.collisionRectangles,1);
+      this.players[i].update(this.collisionRectangles,this.mapInfo.spawns, multiplicator);
     this.accumilator-=this.wishedFrameRate;
 }
 
@@ -91,11 +97,26 @@ for (var i=0;i<this.bullets.length;i++){
   if (this.bullets[i].remove){
     if(this.bullets[i].hitId!=-1){
       for(var i2=0;i2<this.players.length;i2++){
-	if (this.players[i2].id===this.bullets[i].hitId)this.players[i2].onHit(this.bullets[i]);
+    	if (this.players[i2].id===this.bullets[i].hitId){
+            this.players[i2].onHit(this.bullets[i]);
+            for(var i3=0;i3<this.players.length;i3++){
+                if (this.players[i3].id == this.bullets[i].playerid){
+                    this.players[i3].score += (this.bullets[i].damage / 100);
+                }
+            }
+        }
       }
     }
     this.io.to(this.room).emit('addParticle',{pos:{x:this.bullets[i].rect.x,y:this.bullets[i].rect.y},color:"#000000",amount:7});
     this.io.to(this.room).emit('rmBullet',this.bullets[i]);
+
+    var scoreboard = [];
+
+    for (var i4 = 0; i4 < this.players.length; i4++){
+        scoreboard[i4] = {"name":this.players[i4].name,"score":this.players[i4].score};
+    }
+    this.io.to(this.room).emit('update_scoreboard', scoreboard);
+
     this.bullets.splice(i,1);
   }
 }

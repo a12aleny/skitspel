@@ -7,6 +7,8 @@ var bullets=[];
 var mapInfo;
 var collisionRectangles=[];
 
+var score_board = [];
+
 var rectC;
 var cameraOffset={x:0,y:0};
 
@@ -48,11 +50,14 @@ $('#canvas').mousemove(function(e){
 });
 
 $('#button').click(function() {
-    joinGame($('#nameTxt').val(),$('#roomTxt').val(),$('#mapTxt').val());
+    joinGame($('#nameTxt').val(),$('#roomTxt').val(),$('#mapTxt').val(), $('#playertype').val());
 });
 });
 
 
+function sort_scoreboard(a,b) {
+    return b.score - a.score;
+}
 
 function getPlayers (players){
    for (var i=0;i<players.length;i++){
@@ -132,6 +137,11 @@ function render (){
   }
   var width=32;
   ctx.drawImage(crosshairImage,mousePos.x-width/2,mousePos.y-width/2,width,width);
+
+  ctx.font = "17px Arial";
+  for (var i = 0; i < score_board.length; i++){
+  ctx.fillText(score_board[i].name + " : " + score_board[i].score.toFixed(2),10, 20 + (i*20));
+  }
 }
 
 $(socket.on('servers',function(servers){
@@ -158,6 +168,11 @@ socket.on('players',function(plrs){
   getPlayers(plrs);
 });
 
+socket.on('update_scoreboard', function(sb){
+    score_board  = sb;
+    score_board.sort(sort_scoreboard);
+});
+
 socket.on('map',function (mp){
   mapInfo=mp;
   collisionRectangles=mapInfo.map.concat();
@@ -168,7 +183,7 @@ socket.on('addParticle',function (particleData){
 });
 
 socket.on('addBullet',function (blt){
-  bullets[bullets.length]=new bullet(blt.id,blt.playerid,{x:blt.rect.x,y:blt.rect.y},blt.direction);
+  bullets[bullets.length]=new bullet(blt.id,blt.playerid,{x:blt.rect.x,y:blt.rect.y},blt.direction,blt.speed);
 });
 socket.on('rmBullet',function (blt){
   for (var i =0;i<bullets.length;i++){
@@ -199,9 +214,9 @@ socket.on('onConnect',function (data){
   }
 });
 
-function joinGame(name,room,map)
+function joinGame(name,room,map, playertype)
 {
-    socket.emit('joinGame',{name:name,room:room,mapPath:map});
+    socket.emit('joinGame',{name:name,room:room,mapPath:map,playertype:playertype});
 //     $('#button').hide();
 //     $('#nameTxt').hide();
 //     $('#roomTxt').hide();
